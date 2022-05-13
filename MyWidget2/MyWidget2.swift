@@ -23,7 +23,7 @@ struct Provider: IntentTimelineProvider {
         guard let entry = getItemEntry() else {
             return
         }
-        
+
         let timeline = Timeline(entries: [entry], policy: .never)
         completion(timeline)
     }
@@ -44,12 +44,66 @@ struct ItemEntry: TimelineEntry {
 
 struct MyWidget2EntryView : View {
     var entry: Provider.Entry
+    @Environment(\.widgetFamily) var family
+    
+    var body: some View {
+        switch family {
+        case .systemSmall:
+            MyWidgetSmallView(entry: entry)
+
+        case .systemMedium:
+            MyWidgetMediumView(entry: entry)
+
+        default:
+            MyWidgetLargeView(entry: entry)
+        }
+    }
+}
+
+struct MyWidgetSmallView : View {
+    var entry: Provider.Entry
     
     var body: some View {
         VStack(spacing: 10) {
             Text(entry.item.imageName)
                 .font(.largeTitle)
+            
             Text(entry.date, style: .time)
+        }
+    }
+}
+
+struct MyWidgetMediumView : View {
+    var entry: Provider.Entry
+    
+    var body: some View {
+        HStack(spacing: 30) {
+            Text(entry.item.imageName)
+                .font(.system(size: 50))
+            
+            VStack(spacing: 10) {
+                Text(entry.item.name)
+                    .font(.title3.bold())
+                
+                Text(entry.item.description)
+            }
+        }
+    }
+}
+
+struct MyWidgetLargeView : View {
+    var entry: Provider.Entry
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text(entry.item.imageName)
+                .font(.system(size: 80))
+            
+            Text(entry.item.name)
+                .font(.title.bold())
+            
+            Text(entry.item.description)
+                .font(.title3)
         }
     }
 }
@@ -68,17 +122,27 @@ struct MyWidget2: Widget {
         }
         .configurationDisplayName("My Widget")
         .description("This is an example widget.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemMedium])
     }
 }
 
 struct MyWidget2_Previews: PreviewProvider {
+    static let entry = ItemEntry(item: Item(
+        name: "Rose",
+        description: "I love you!",
+        imageName: "🌹"
+    ))
+    
     static var previews: some View {
-        MyWidget2EntryView(entry: ItemEntry(item: Item(
-            name: "Rose",
-            description: "I love you!",
-            imageName: "🌹"))
-        )
-        .previewContext(WidgetPreviewContext(family: .systemSmall))
+        Group {
+            MyWidget2EntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .systemSmall))
+            
+            MyWidget2EntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .systemMedium))
+            
+            MyWidget2EntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .systemLarge))
+        }
     }
 }

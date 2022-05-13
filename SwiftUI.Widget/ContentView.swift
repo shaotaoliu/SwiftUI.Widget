@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 struct ContentView: View {
     
@@ -15,11 +16,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 50) {
             ForEach(items, id: \.name) { item in
                 Button(action: {
-                    guard let data = try? JSONEncoder().encode(item) else {
-                        return
-                    }
-                    
-                    itemData = data
+                    refreshWidget(item: item)
                 }, label: {
                     HStack(spacing: 20) {
                         Text(item.imageName)
@@ -39,6 +36,15 @@ struct ContentView: View {
             }
         }
     }
+    
+    private func refreshWidget(item: Item) {
+        guard let data = try? JSONEncoder().encode(item) else {
+            return
+        }
+        
+        itemData = data
+        WidgetCenter.shared.reloadAllTimelines()
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -46,3 +52,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
